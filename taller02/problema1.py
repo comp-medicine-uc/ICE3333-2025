@@ -13,7 +13,15 @@ domain = mesh.create_unit_square(MPI.COMM_WORLD, 20, 20, mesh.CellType.triangle)
 V = fem.functionspace(domain, ("CG", 1)) 
 
 #CB Dirichlet
-dofs_boundary_all = fem.locate_dofs_geometrical(V, lambda X: np.full(X.shape[1], True))
+#boundary_facets = mesh.locate_entities_boundary(domain, domain.topology.dim - 1, lambda x: np.full(x.shape[1], True))
+#dofs_boundary=fem.locate_dofs_topological(V, domain.topology.dim - 1, boundary_facets)
+
+def on_boundary(x):
+    return np.isclose(x[0], -2) | np.isclose(x[0], 2.0) |  np.isclose(x[1], -2.0) | np.isclose(x[1], 2.0)
+dofs_boundary_all = fem.locate_dofs_geometrical(V, on_boundary)
+
+
+
 x = ufl.SpatialCoordinate(domain)
 
 u_ast = x[0]*(1 - x[0]) * x[1]*(1 - x[1])
